@@ -1,14 +1,15 @@
 package com.bain.learn;
 
 public class Client {
-	public static ServiceFactory sexServiceFactory = new ServiceFactory() {
-		@Override
-		public Service createService() {
-			return new SexService();
-		}
-	};
+	
+	public static Pimp callPimp(String number){
+		return new Pimp(number);
+	}
+	
 	public static void main(String[] args) {
-		Service service = sexServiceFactory.createService();
-		service.supply();
+		String number = "110";
+		Pimp pimp  = callPimp(number);
+		Service hooker = pimp.callHooker("Lily");
+		hooker.supply();
 	}
 }

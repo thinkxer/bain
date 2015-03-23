@@ -1,5 +1,6 @@
 package com.bain.learn;
 
 public interface ServiceFactory {
-	Service createService();
+
+	Service createService(String name);
 }
