@@ -1,4 +1,4 @@
-package com.bain.learn;
+package com.bain.learn.factory;
 
 public interface Service {
 	void supply();
