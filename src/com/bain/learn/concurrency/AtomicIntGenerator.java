@@ -6,18 +6,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class AtomicIntGenerator implements Runnable {
 
+	private static final int MAX_NUM = 99999;
 	private static AtomicInteger ai = new AtomicInteger(0);
+	private static Integer serial = 0;
 	private static volatile boolean canceled = false;
 	private int value = 0;
 	private int id;
+	private int count = 0;
 
 	public AtomicIntGenerator(int i) {
 		this.id = i;
 	}
-
-	// public long getUniqueLong() {
-	// return System.currentTimeMillis() + generateDigitInt(5);
-	// }
 
 	public void cancel() {
 		canceled = true;
@@ -26,16 +25,46 @@ public class AtomicIntGenerator implements Runnable {
 	/**
 	 *	@Bain: I think this is much safer.
 	 */
-	private int generateDigitInt(int digit) {
-		synchronized (ai) {
-			if (ai.get() > digit) {
-				ai.set(0);
+	private int generateDigitInt(int maxNum) {
+//		synchronized (ai) {
+//			if (ai.get() > maxNum) {
+//				ai.set(0);
+//			}
+//			value = ai.getAndIncrement();
+//		}
+		synchronized (serial) {
+			if(serial>maxNum){
+				serial = 0;
 			}
-			value = ai.getAndIncrement();
+			value = serial++;
 		}
+		count++;
 		return value;
 	}
 
+	/**
+	 * @author Bain
+	 * @comment: I think it will work
+	 */
+	private long  generateDigitLong(int maxNum){
+		int i = generateDigitInt(maxNum);
+		return Long.parseLong(System.currentTimeMillis()+addLeftZero(String.valueOf(maxNum).length(), i));
+	}
+
+	private String addLeftZero(int digit, int num){
+		String str = String.valueOf(num);
+		int length = str.length();
+		if (length < digit) {
+			for (int i = 0; i < digit - length; i++) {
+				str = "0" + str;
+			}
+		}
+		if(str.length()>digit){
+			cancel();
+		}
+		return str;
+	}
+	
 	/**
 	 * @Bain: this is not safe about the if-else operation
 	 * @param digit
@@ -68,8 +97,7 @@ public class AtomicIntGenerator implements Runnable {
 
 	@Override
 	public String toString() {
-		// TODO Auto-generated method stub
-		return "#" + id + ":" + value;
+		return "#" + id + ":" + value+"\tcount:"+count;
 	}
 
 	/**
@@ -77,11 +105,11 @@ public class AtomicIntGenerator implements Runnable {
 	 */
 	public void run() {
 		while (!canceled) {
-			int value = generateDigitInt(3);
-			if (value > 3) {
+			long num = generateDigitLong(MAX_NUM);
+			if(value>MAX_NUM){
 				cancel();
 			}
-			System.out.println(this);
+			System.out.println(this+"\t"+num);
 		}
 	}
 
